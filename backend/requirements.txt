@@ -3,3 +3,9 @@ uvicorn[standard]
 scikit-learn
 pandas
 pydantic
+SQLAlchemy
+psycopg2-binary
+passlib
+bcrypt==4.0.1
+python-jose
+python-multipart
