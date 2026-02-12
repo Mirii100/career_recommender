@@ -7,7 +7,7 @@ from app.custom_transformers import MLBWrapper
 class Recommender:
     def __init__(self, courses_path, careers_path, rf_model_path, xgb_model_path, metrics_path, career_model_path, career_label_encoder_path):
         print("Initializing Recommender...")
-        self.courses_path = "data/combined_courses.csv"
+        self.courses_path = courses_path
         self.careers_path = careers_path
         self.rf_model_path = rf_model_path
         self.xgb_model_path = xgb_model_path
@@ -17,6 +17,8 @@ class Recommender:
 
         self.courses_df = pd.read_csv(self.courses_path).fillna('N/A')
         self.careers_df = pd.read_csv(self.careers_path).fillna('N/A')
+        self.careers_df['career_name'] = self.careers_df['career_name'].apply(lambda x: x.strip())
+        self.course_meta_df = pd.read_csv("data/courses_jobApplicability_future_trends_automation_risk.csv").fillna('N/A')
 
         self._load_models()
 
@@ -124,18 +126,53 @@ class Recommender:
             # This is a temporary placeholder until the course model is retrained
             if not self.courses_df.empty:
                 course_info = self.courses_df.sample(n=1).iloc[0]
-                skills = course_info['skills_tags'].split(',')[:3]
-                reasoning = f"This course is a great fit for you because it aligns with your interests in {', '.join(student_input.interests)} and will help you develop skills in {', '.join(skills)}."
+                course_skills = [s.strip() for s in course_info['skills_tags'].split(',') if s.strip()]
+                matched_interests = [i for i in student_input.interests if i in course_skills]
+                matched_skills = [s for s in student_input.skills if s in course_skills]
+
+                reasoning_parts = [f"This course is a great fit for you based on your academic profile and aptitudes."]
+                if matched_interests:
+                    reasoning_parts.append(f"It aligns with your interests in {', '.join(matched_interests)}.")
+                if matched_skills:
+                    reasoning_parts.append(f"It will help you develop skills in {', '.join(matched_skills)}.")
+                if not matched_interests and not matched_skills:
+                    reasoning_parts.append(f"It will help you develop skills such as {', '.join(course_skills[:3])}.") # Fallback to general skills
+
+                # Look up additional course metadata
+                job_applicability = "N/A"
+                future_trends = "N/A"
+                automation_risk = "N/A"
+
+                recommended_course_name_lower = course_info['course_name'].lower()
+                print(f"\nAttempting to find metadata for recommended course: '{recommended_course_name_lower}'")
+                
+                for idx, meta_row in self.course_meta_df.iterrows():
+                    meta_course_name_lower = meta_row['course_name'].lower()
+                    print(f"  Comparing with meta course: '{meta_course_name_lower}'")
+                    if meta_course_name_lower in recommended_course_name_lower or recommended_course_name_lower in meta_course_name_lower:
+                        job_applicability = meta_row['job_applicability']
+                        future_trends = meta_row['future_trends']
+                        automation_risk = meta_row['automation_risk']
+                        print(f"  Match found! Metadata: {meta_row.to_dict()}")
+                        break # Found a match, no need to check further
+                if job_applicability == "N/A":
+                    print(f"  No metadata match found for '{recommended_course_name_lower}'. Providing generic statements.")
+                    job_applicability = "This course offers broad applicability in various industries."
+                    future_trends = "The skills learned in this course are highly relevant for future industry trends."
+                    automation_risk = "This course focuses on skills with low automation risk."
+
+                reasoning = " ".join(reasoning_parts)
+                
                 course_recommendations.append({
-                    "name": course_info['title'],
+                    "name": course_info['course_name'],
                     "type": course_type,
                     "similarity_score": score, # Still use the score from the model
                     "description": course_info['description'],
                     "reasoning": reasoning,
                     "skills_tags": course_info['skills_tags'], # Add skills_tags
-                    "job_applicability": "N/A",
-                    "future_trends": "N/A",
-                    "automation_risk": "N/A"
+                    "job_applicability": job_applicability,
+                    "future_trends": future_trends,
+                    "automation_risk": automation_risk
                 })
             else:
                 course_recommendations.append({
@@ -185,23 +222,53 @@ class Recommender:
         career_predictions_decoded = self.career_label_encoder.inverse_transform(career_predictions_encoded)
         
         career_recommendations = []
-        for career_name in career_predictions_decoded[:5]: # Top 5 career predictions
-            career_info_df = self.careers_df[self.careers_df['career_name'] == career_name]
-            if career_info_df.empty:
-                print(f"Warning: Predicted career '{career_name}' not found in careers.csv. Skipping.")
-                continue
+        for career_name_raw in career_predictions_decoded: # Iterate through all predicted careers
+            predicted_career_name = career_name_raw.strip()
             
-            career_info = career_info_df.iloc[0]
-            career_recommendations.append({
-                "name": career_info['career_name'],
-                "type": "career",
-                "similarity_score": 1.0, # Placeholder, as we don't have probabilities for career model
-                "description": career_info['description'],
-                "reasoning": "Recommended based on your aptitudes and interests.",
-                "job_applicability": career_info['job_applicability'],
-                "future_trends": career_info['future_trends'],
-                "automation_risk": career_info['automation_risk']
-            })
+            career_info = None
+            
+            # 1. Try exact match
+            career_info_df = self.careers_df[self.careers_df['career_name'].str.lower() == predicted_career_name.lower()]
+            if not career_info_df.empty:
+                career_info = career_info_df.iloc[0]
+            else:
+                # 2. Try flexible (substring) match
+                for idx, row in self.careers_df.iterrows():
+                    if predicted_career_name.lower() in row['career_name'].lower() or row['career_name'].lower() in predicted_career_name.lower():
+                        career_info = row
+                        break
+            
+            if career_info is not None:
+                career_reasoning = (
+                    f"This career is recommended based on your aptitudes. "
+                    f"It typically requires skills such as {career_info['required_skills']}."
+                )
+                career_recommendations.append({
+                    "name": career_info['career_name'],
+                    "type": "career",
+                    "similarity_score": 1.0, # Placeholder, as we don't have probabilities for career model
+                    "description": career_info['description'],
+                    "reasoning": career_reasoning,
+                    "job_applicability": "N/A",
+                    "future_trends": "N/A",
+                    "automation_risk": "N/A"
+                })
+            else:
+                print(f"Warning: Predicted career '{predicted_career_name}' not found in career.csv even after flexible matching. Skipping.")
+                # Optionally, add a generic recommendation or skip
+                career_recommendations.append({
+                    "name": predicted_career_name, # Use the predicted name
+                    "type": "career",
+                    "similarity_score": 0.0, # No match found
+                    "description": "No detailed information available for this career.",
+                    "reasoning": "Recommended based on your aptitudes, but detailed information is not available.",
+                    "job_applicability": "N/A",
+                    "future_trends": "N/A",
+                    "automation_risk": "N/A"
+                })
+        
+        # Limit to top 5 career recommendations if more than 5 are generated
+        career_recommendations = career_recommendations[:5]
 
         return {
             "average_points": average_points,

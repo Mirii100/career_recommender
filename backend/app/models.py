@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -27,6 +27,7 @@ class Student(BaseModel):
     p6: str
     p7: str
     p8: str
+    preferred_careers: Optional[List[str]] = None
 
 class User(Base):
     __tablename__ = "users"
@@ -71,3 +72,15 @@ class Rating(Base):
     comment = Column(String)
 
     recommendation = relationship("Recommendation")
+
+class ModelMetric(Base):
+    __tablename__ = "model_metrics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    model_name = Column(String, index=True)
+    accuracy = Column(Float)
+    precision = Column(Float)
+    recall = Column(Float)
+    f1_score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    

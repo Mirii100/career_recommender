@@ -33,6 +33,9 @@ course_df = pd.read_csv(course_data_path)
 career_data_path = './data/cleaned_dataset.csv'
 career_df = pd.read_csv(career_data_path)
 
+# Clean 'Job profession' column in career_df
+career_df['Job profession'] = career_df['Job profession'].apply(lambda x: x.strip())
+
 # --- 2. Feature Engineering (Course Recommendation) ---
 
 # Define grade to points mapping
@@ -155,31 +158,51 @@ career_recall = recall_score(y_career_test, career_predictions, average='weighte
 career_f1 = f1_score(y_career_test, career_predictions, average='weighted', zero_division=0)
 print(f"Career Recommendation - Accuracy: {career_accuracy:.2f}, Precision: {career_precision:.2f}, Recall: {career_recall:.2f}, F1-Score: {career_f1:.2f}")
 
-# --- 8. Save Metrics and Models ---
+# --- 8. Save Metrics and Models to Database ---
 
-metrics_path = './app/model_metrics.json'
-with open(metrics_path, 'w') as f:
-    json.dump({
-        "random_forest_course": {
-            "accuracy": rf_course_accuracy,
-            "precision": rf_course_precision,
-            "recall": rf_course_recall,
-            "f1_score": rf_course_f1
-        },
-        "xgboost_course": {
-            "accuracy": xgb_course_accuracy,
-            "precision": xgb_course_precision,
-            "recall": xgb_course_recall,
-            "f1_score": xgb_course_f1
-        },
-        "career_recommendation": {
-            "accuracy": career_accuracy,
-            "precision": career_precision,
-            "recall": career_recall,
-            "f1_score": career_f1
-        }
-    }, f)
-print(f"Model metrics saved to {metrics_path}")
+# Import database session and model
+from app.database import SessionLocal
+from app.models import ModelMetric
+
+# Create a new database session
+db = SessionLocal()
+
+try:
+    # Clear existing metrics to avoid stale data
+    db.query(ModelMetric).delete()
+
+    # Create and add new metric records
+    rf_course_metrics = ModelMetric(
+        model_name="random_forest_course",
+        accuracy=rf_course_accuracy,
+        precision=rf_course_precision,
+        recall=rf_course_recall,
+        f1_score=rf_course_f1
+    )
+    xgb_course_metrics = ModelMetric(
+        model_name="xgboost_course",
+        accuracy=xgb_course_accuracy,
+        precision=xgb_course_precision,
+        recall=xgb_course_recall,
+        f1_score=xgb_course_f1
+    )
+    career_metrics = ModelMetric(
+        model_name="career_recommendation",
+        accuracy=career_accuracy,
+        precision=career_precision,
+        recall=career_recall,
+        f1_score=career_f1
+    )
+
+    db.add_all([rf_course_metrics, xgb_course_metrics, career_metrics])
+    db.commit()
+    print("Model metrics successfully saved to the database.")
+
+except Exception as e:
+    print(f"Error saving metrics to database: {e}")
+    db.rollback()
+finally:
+    db.close()
 
 # Save the Models
 joblib.dump(rf_course_pipeline, './app/random_forest_course_model.joblib')

@@ -102,7 +102,7 @@ app.add_middleware(
 )
 
 recommender = Recommender(
-    courses_path="data/courses.csv",
+    courses_path="data/final_courses_cleaned.csv",
     careers_path="data/careers.csv",
     rf_model_path="app/random_forest_course_model.joblib", # Updated path
     xgb_model_path="app/xgboost_course_model.joblib", # Updated path
@@ -291,15 +291,21 @@ def get_all_ratings(db: Session = Depends(get_db)):
     return ratings
 
 @app.get("/model-metrics/")
-def get_model_metrics():
-    try:
-        with open(recommender.metrics_path, 'r') as f:
-            metrics = json.load(f)
-        return metrics
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Model metrics file not found.")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Error decoding model metrics file.")
+def get_model_metrics(db: Session = Depends(get_db)):
+    metrics = db.query(models.ModelMetric).all()
+    if not metrics:
+        raise HTTPException(status_code=404, detail="Model metrics not found in database.")
+
+    # Format the metrics into the expected JSON structure
+    formatted_metrics = {}
+    for metric in metrics:
+        formatted_metrics[metric.model_name] = {
+            "accuracy": metric.accuracy,
+            "precision": metric.precision,
+            "recall": metric.recall,
+            "f1_score": metric.f1_score
+        }
+    return formatted_metrics
 
 @app.get("/recommendations/history/", response_model=List[schemas.RecommendationInDB])
 def get_recommendation_history(
