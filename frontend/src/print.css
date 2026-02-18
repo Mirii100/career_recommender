@@ -1,0 +1,38 @@
+@media print {
+  /* Hide the main form and other interactive elements when printing */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure the report content is visible and formatted */
+  .printable-area {
+    display: block !important;
+  }
+
+  /* General print styles */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .accordion-button::after {
+    display: none; /* Hide accordion arrows */
+  }
+
+  .accordion-collapse {
+    display: block !important; /* Show all accordion content */
+  }
+
+  .accordion-body {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  .card, .list-group-item {
+    page-break-inside: avoid;
+  }
+}
