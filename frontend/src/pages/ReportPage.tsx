@@ -150,7 +150,7 @@ const ReportPage: React.FC = () => {
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
         <div>
           <h1 className="text-primary fw-bold mb-0">Academic & Career Path Analysis</h1>
-          <p className="text-muted mb-0">Personalized Guidance Report</p>
+          <p className="text-muted mb-0">Personalized Guidance Report for <strong>{userDetails ? userDetails.username : 'Student'}</strong> | {new Date().toLocaleDateString()}</p>
         </div>
         <Button variant="outline-primary" onClick={() => window.print()} className="no-print shadow-sm px-4">
           <i className="bi bi-printer me-2"></i> Download PDF Report
