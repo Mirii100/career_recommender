@@ -49,7 +49,7 @@ async def run_train_script_in_background():
 async def monitor_and_reload_models():
     """Monitors model files for changes and reloads them dynamically."""
     global last_model_mtime
-    model_paths = [recommender.rf_model_path, recommender.xgb_model_path]
+    model_paths = [recommender.rf_model_path, recommender.xgb_model_path, recommender.svm_model_path]
     
     # Initialize last_model_mtime with the current modification time of the newest model
     for path in model_paths:
@@ -106,6 +106,7 @@ recommender = Recommender(
     careers_path="data/careers.csv",
     rf_model_path="app/random_forest_course_model.joblib", # Updated path
     xgb_model_path="app/xgboost_course_model.joblib", # Updated path
+    svm_model_path="app/svm_course_model.joblib", # New path
     metrics_path="app/model_metrics.json",
     career_model_path="app/career_recommendation_model.joblib", # New path
     career_label_encoder_path="app/career_label_encoder.joblib" # New path
@@ -156,9 +157,14 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = auth.get_user(db, username=user.username)
-    if db_user:
+    db_user_username = auth.get_user(db, username=user.username)
+    if db_user_username:
         raise HTTPException(status_code=400, detail="Username already registered")
+    
+    db_user_email = auth.get_user(db, email=user.email)
+    if db_user_email:
+        raise HTTPException(status_code=400, detail="Email already registered")
+        
     return auth.create_user(db=db, user=user)
 
 

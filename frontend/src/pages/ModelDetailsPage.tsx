@@ -14,6 +14,12 @@ interface ModelMetrics {
     recall: number;
     f1_score: number;
   };
+  svm_course: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1_score: number;
+  };
   career_recommendation: {
     accuracy: number;
     precision: number;
@@ -95,6 +101,20 @@ const ModelDetailsPage: React.FC = () => {
                   </Card.Text>
                   <Card.Text>
                     F1-Score: <strong>{(metrics.xgboost_course.f1_score * 100).toFixed(2)}%</strong>
+                  </Card.Text>
+
+                  <h3 className="mt-4">SVM Course Model</h3>
+                  <Card.Text>
+                    Accuracy: <strong>{(metrics.svm_course.accuracy * 100).toFixed(2)}%</strong>
+                  </Card.Text>
+                  <Card.Text>
+                    Precision: <strong>{(metrics.svm_course.precision * 100).toFixed(2)}%</strong>
+                  </Card.Text>
+                  <Card.Text>
+                    Recall: <strong>{(metrics.svm_course.recall * 100).toFixed(2)}%</strong>
+                  </Card.Text>
+                  <Card.Text>
+                    F1-Score: <strong>{(metrics.svm_course.f1_score * 100).toFixed(2)}%</strong>
                   </Card.Text>
 
                   <h3 className="mt-4">Career Recommendation Model</h3>

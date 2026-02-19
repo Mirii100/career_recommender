@@ -5,12 +5,13 @@ import json
 from app.custom_transformers import MLBWrapper
 
 class Recommender:
-    def __init__(self, courses_path, careers_path, rf_model_path, xgb_model_path, metrics_path, career_model_path, career_label_encoder_path):
+    def __init__(self, courses_path, careers_path, rf_model_path, xgb_model_path, svm_model_path, metrics_path, career_model_path, career_label_encoder_path):
         print("Initializing Recommender...")
         self.courses_path = courses_path
         self.careers_path = careers_path
         self.rf_model_path = rf_model_path
         self.xgb_model_path = xgb_model_path
+        self.svm_model_path = svm_model_path
         self.metrics_path = metrics_path
         self.career_model_path = career_model_path
         self.career_label_encoder_path = career_label_encoder_path
@@ -33,6 +34,7 @@ class Recommender:
         # Load course recommendation models
         self.rf_course_model_pipeline = joblib.load(self.rf_model_path)
         self.xgb_course_model_pipeline = joblib.load(self.xgb_model_path)
+        self.svm_course_model_pipeline = joblib.load(self.svm_model_path)
 
         # Load career recommendation model and label encoder
         self.career_model_pipeline = joblib.load(self.career_model_path)
@@ -44,28 +46,41 @@ class Recommender:
         print("Models and metrics loaded successfully.")
 
         # Determine the best course model based on accuracy
-        if self.metrics["random_forest_course"]['accuracy'] >= self.metrics["xgboost_course"]['accuracy']:
+        model_accuracies = {
+            "Random Forest Course": self.metrics.get("random_forest_course", {}).get('accuracy', 0),
+            "XGBoost Course": self.metrics.get("xgboost_course", {}).get('accuracy', 0),
+            "SVM Course": self.metrics.get("svm_course", {}).get('accuracy', 0)
+        }
+        
+        best_model_name = max(model_accuracies, key=model_accuracies.get)
+        self.chosen_course_model_name = best_model_name
+
+        if best_model_name == "Random Forest Course":
             self.course_model_pipeline = self.rf_course_model_pipeline
-            self.chosen_course_model_name = "Random Forest Course"
-        else:
+        elif best_model_name == "XGBoost Course":
             self.course_model_pipeline = self.xgb_course_model_pipeline
-            self.chosen_course_model_name = "XGBoost Course"
-        print(f"Chosen course model for recommendations: {self.chosen_course_model_name}")
+        else:
+            self.course_model_pipeline = self.svm_course_model_pipeline
+            
+        print(f"Chosen course model for recommendations: {self.chosen_course_model_name} (Accuracy: {model_accuracies[best_model_name]:.2f})")
 
     def _get_profile_rating(self, avg_points):
         if avg_points >= 10:
             return "Excellent Profile"
         elif avg_points >= 8:
             return "Strong Profile"
-        elif avg_points >= 6:
+        elif avg_points >= 6.5:
             return "Good Profile"
         else:
             return "Developing Profile"
 
     def _get_course_type(self, avg_points):
-        if avg_points > 7:
-            return "Degree"
-        elif 4 < avg_points <= 7:
+        # In the Kenyan system (referenced in project context):
+        # C+ (7.0) is the minimum for Degree.
+        # We'll use 6.8 as a threshold to be safe with rounding.
+        if avg_points >= 6.8:
+            return "Bachelor's Degree"
+        elif 5.0 <= avg_points < 6.8:
             return "Diploma"
         else:
             return "Certificate"
@@ -144,6 +159,12 @@ class Recommender:
                 automation_risk = "N/A"
 
                 recommended_course_name_lower = course_info['course_name'].lower()
+                
+                # Prepend degree type to name if it's a Bachelor's Degree for more professional output
+                final_course_name = course_info['course_name']
+                if course_type == "Bachelor's Degree" and "bachelor" not in recommended_course_name_lower:
+                    final_course_name = f"Bachelor of {final_course_name}"
+
                 print(f"\nAttempting to find metadata for recommended course: '{recommended_course_name_lower}'")
                 
                 for idx, meta_row in self.course_meta_df.iterrows():
@@ -164,7 +185,7 @@ class Recommender:
                 reasoning = " ".join(reasoning_parts)
                 
                 course_recommendations.append({
-                    "name": course_info['course_name'],
+                    "name": final_course_name,
                     "type": course_type,
                     "similarity_score": score, # Still use the score from the model
                     "description": course_info['description'],

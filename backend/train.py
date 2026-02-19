@@ -18,6 +18,7 @@ from app.custom_transformers import MLBWrapper
 import joblib
 import json
 import xgboost as xgb
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -107,6 +108,11 @@ xgb_course_pipeline = Pipeline(steps=[
     ('classifier', xgb.XGBClassifier(objective='multi:softmax', num_class=len(y_course.unique()), use_label_encoder=False, eval_metric='mlogloss', n_estimators=100, random_state=42))
 ])
 
+svm_course_pipeline = Pipeline(steps=[
+    ('preprocessor', course_preprocessor),
+    ('classifier', SVC(probability=True, kernel='rbf', C=1.0, random_state=42))
+])
+
 # Career Recommendation Preprocessor
 career_preprocessor = ColumnTransformer(
     transformers=[
@@ -129,6 +135,9 @@ rf_course_pipeline.fit(X_course_train, y_course_train)
 print("Training the XGBoost course model...")
 xgb_course_pipeline.fit(X_course_train, y_course_train)
 
+print("Training the SVM course model...")
+svm_course_pipeline.fit(X_course_train, y_course_train)
+
 print("Training the Career recommendation model...")
 career_pipeline.fit(X_career_train, y_career_train)
 
@@ -149,6 +158,14 @@ xgb_course_precision = precision_score(y_course_test, xgb_course_predictions, av
 xgb_course_recall = recall_score(y_course_test, xgb_course_predictions, average='weighted', zero_division=0)
 xgb_course_f1 = f1_score(y_course_test, xgb_course_predictions, average='weighted', zero_division=0)
 print(f"XGBoost Course - Accuracy: {xgb_course_accuracy:.2f}, Precision: {xgb_course_precision:.2f}, Recall: {xgb_course_recall:.2f}, F1-Score: {xgb_course_f1:.2f}")
+
+# SVM Course Evaluation
+svm_course_predictions = svm_course_pipeline.predict(X_course_test)
+svm_course_accuracy = accuracy_score(y_course_test, svm_course_predictions)
+svm_course_precision = precision_score(y_course_test, svm_course_predictions, average='weighted', zero_division=0)
+svm_course_recall = recall_score(y_course_test, svm_course_predictions, average='weighted', zero_division=0)
+svm_course_f1 = f1_score(y_course_test, svm_course_predictions, average='weighted', zero_division=0)
+print(f"SVM Course - Accuracy: {svm_course_accuracy:.2f}, Precision: {svm_course_precision:.2f}, Recall: {svm_course_recall:.2f}, F1-Score: {svm_course_f1:.2f}")
 
 # Career Recommendation Evaluation
 career_predictions = career_pipeline.predict(X_career_test)
@@ -186,6 +203,13 @@ try:
         recall=xgb_course_recall,
         f1_score=xgb_course_f1
     )
+    svm_course_metrics = ModelMetric(
+        model_name="svm_course",
+        accuracy=svm_course_accuracy,
+        precision=svm_course_precision,
+        recall=svm_course_recall,
+        f1_score=svm_course_f1
+    )
     career_metrics = ModelMetric(
         model_name="career_recommendation",
         accuracy=career_accuracy,
@@ -194,7 +218,7 @@ try:
         f1_score=career_f1
     )
 
-    db.add_all([rf_course_metrics, xgb_course_metrics, career_metrics])
+    db.add_all([rf_course_metrics, xgb_course_metrics, svm_course_metrics, career_metrics])
     db.commit()
     print("Model metrics successfully saved to the database.")
 
@@ -209,6 +233,8 @@ joblib.dump(rf_course_pipeline, './app/random_forest_course_model.joblib')
 print("Random Forest course model pipeline saved to ./app/random_forest_course_model.joblib")
 joblib.dump(xgb_course_pipeline, './app/xgboost_course_model.joblib')
 print("XGBoost course model pipeline saved to ./app/xgboost_course_model.joblib")
+joblib.dump(svm_course_pipeline, './app/svm_course_model.joblib')
+print("SVM course model pipeline saved to ./app/svm_course_model.joblib")
 joblib.dump(career_pipeline, './app/career_recommendation_model.joblib')
 print("Career recommendation model pipeline saved to ./app/career_recommendation_model.joblib")
 joblib.dump(career_label_encoder, './app/career_label_encoder.joblib')
