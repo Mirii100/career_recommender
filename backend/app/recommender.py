@@ -74,16 +74,17 @@ class Recommender:
         else:
             return "Developing Profile"
 
-    def _get_course_type(self, avg_points):
-        # In the Kenyan system (referenced in project context):
-        # C+ (7.0) is the minimum for Degree.
-        # We'll use 6.8 as a threshold to be safe with rounding.
-        if avg_points >= 6.8:
-            return "Bachelor's Degree"
-        elif 5.0 <= avg_points < 6.8:
-            return "Diploma"
+    def _get_possible_course_types(self, avg_points):
+        # Based on the Kenyan grading system:
+        # C+ (7.0) and above: Eligible for Bachelor's Degree and Diploma
+        # Between C- (5.0) and C+ (7.0): Eligible for Diploma
+        # Below C- (5.0): Eligible for Certificate
+        if avg_points >= 7.0:
+            return ["Bachelor's Degree", "Diploma"]
+        elif avg_points >= 5.0:
+            return ["Diploma"]
         else:
-            return "Certificate"
+            return ["Certificate"]
 
     def _generate_reasoning(self, student_df, item_features=None): # item_features is now optional
         return "Recommended based on a predictive model trained on student profiles and aptitudes."
@@ -106,7 +107,7 @@ class Recommender:
 
         average_points = total_points / num_subjects if num_subjects > 0 else 0
         profile_rating = self._get_profile_rating(average_points)
-        course_type = self._get_course_type(average_points)
+        possible_types = self._get_possible_course_types(average_points)
 
         # Create a DataFrame for the course model input
         course_model_input_data = {subject: [student_data[subject]] for subject in self.all_subjects}
@@ -122,10 +123,18 @@ class Recommender:
         top_5_course_indices = np.argsort(course_probabilities)[::-1][:5]
         
         course_recommendations = []
-        for i in top_5_course_indices:
+        for idx, i in enumerate(top_5_course_indices):
             course_id = course_model_classes[i]
             score = course_probabilities[i]
             
+            # Distribute possible types:
+            # If both Bachelor's and Diploma are possible (avg >= 7.0),
+            # we make the top 3 Bachelor's and the next 2 Diploma.
+            if len(possible_types) > 1:
+                current_type = possible_types[0] if idx < 3 else possible_types[1]
+            else:
+                current_type = possible_types[0]
+
             # The course_id from the model prediction no longer directly maps to combined_courses.csv
             # For now, we will just pick a course from combined_courses_df based on some criteria
             # A more robust solution would involve retraining the course model with a target that maps to combined_courses.csv
@@ -160,24 +169,25 @@ class Recommender:
 
                 recommended_course_name_lower = course_info['course_name'].lower()
                 
-                # Prepend degree type to name if it's a Bachelor's Degree for more professional output
+                # Prepend degree type to name for more professional output
                 final_course_name = course_info['course_name']
-                if course_type == "Bachelor's Degree" and "bachelor" not in recommended_course_name_lower:
+                if current_type == "Bachelor's Degree" and "bachelor" not in recommended_course_name_lower:
                     final_course_name = f"Bachelor of {final_course_name}"
+                elif current_type == "Diploma" and "diploma" not in recommended_course_name_lower:
+                    final_course_name = f"Diploma in {final_course_name}"
+                elif current_type == "Certificate" and "certificate" not in recommended_course_name_lower:
+                    final_course_name = f"Certificate in {final_course_name}"
 
                 print(f"\nAttempting to find metadata for recommended course: '{recommended_course_name_lower}'")
                 
-                for idx, meta_row in self.course_meta_df.iterrows():
+                for idx_meta, meta_row in self.course_meta_df.iterrows():
                     meta_course_name_lower = meta_row['course_name'].lower()
-                    print(f"  Comparing with meta course: '{meta_course_name_lower}'")
                     if meta_course_name_lower in recommended_course_name_lower or recommended_course_name_lower in meta_course_name_lower:
                         job_applicability = meta_row['job_applicability']
                         future_trends = meta_row['future_trends']
                         automation_risk = meta_row['automation_risk']
-                        print(f"  Match found! Metadata: {meta_row.to_dict()}")
                         break # Found a match, no need to check further
                 if job_applicability == "N/A":
-                    print(f"  No metadata match found for '{recommended_course_name_lower}'. Providing generic statements.")
                     job_applicability = "This course offers broad applicability in various industries."
                     future_trends = "The skills learned in this course are highly relevant for future industry trends."
                     automation_risk = "This course focuses on skills with low automation risk."
@@ -186,7 +196,7 @@ class Recommender:
                 
                 course_recommendations.append({
                     "name": final_course_name,
-                    "type": course_type,
+                    "type": current_type,
                     "similarity_score": score, # Still use the score from the model
                     "description": course_info['description'],
                     "reasoning": reasoning,

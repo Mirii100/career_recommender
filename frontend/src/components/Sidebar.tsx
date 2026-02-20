@@ -14,7 +14,7 @@ const Sidebar = () => {
 
   return (
     <div className="d-flex flex-column vh-100 bg-dark p-3 text-white shadow no-print" style={{ width: '280px' }}>
-      <h4 className="mb-4 text-center fw-bold border-bottom pb-3">Career Guidance AI</h4>
+      <h4 className="mb-4 text-center fw-bold border-bottom pb-3">Career Recommendation System</h4>
       <Nav variant="pills" className="flex-column mb-auto gap-1">
         <Nav.Item>
           <Nav.Link as={NavLink} to="/" end className="d-flex align-items-center rounded-3 py-2 px-3">

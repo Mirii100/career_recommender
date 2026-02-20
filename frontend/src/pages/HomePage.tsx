@@ -12,7 +12,7 @@ const HomePage = () => {
         <Card.Body className="p-5">
           <Row className="align-items-center">
             <Col lg={7}>
-              <h1 className="display-4 fw-bold mb-4 text-primary">Your Future, Guided by AI</h1>
+              <h1 className="display-4 fw-bold mb-4 text-primary">Your Future, Guided by Technology</h1>
               <Card.Text className="lead mb-4">
                 This system is designed to provide personalized course and career guidance for high school graduates.
                 It bridges the gap between educational outcomes and long-term career success by integrating academic results, student interests, and local labor market insights.
@@ -53,7 +53,7 @@ const HomePage = () => {
             <Card.Body className="p-4">
               <h3 className="h5 fw-bold mb-3">Key Features</h3>
               <ul className="list-unstyled">
-                <li className="mb-2"><strong>✓ Recommendation Form:</strong> Personalized AI-driven suggestions.</li>
+                <li className="mb-2"><strong>✓ Recommendation Form:</strong> Personalized technology-driven suggestions.</li>
                 <li className="mb-2"><strong>✓ View Report:</strong> Detailed insights into your career path.</li>
                 <li className="mb-2"><strong>✓ Data Insights:</strong> Explore labor market trends and skills.</li>
                 <li className="mb-2"><strong>✓ Model Details:</strong> Transparent view into our ML algorithms.</li>
@@ -69,7 +69,7 @@ const HomePage = () => {
                 We aim to reduce dropout rates, minimize skill mismatches, and align education with workforce needs in Kenya and other Sub-Saharan African countries.
               </Card.Text>
               <Card.Text className="text-muted small">
-                By leveraging advanced AI models like Random Forest and XGBoost, we provide precision guidance for your educational journey.
+                By leveraging advanced machine learning models like Random Forest and XGBoost, we provide precision guidance for your educational journey.
               </Card.Text>
             </Card.Body>
           </Card>

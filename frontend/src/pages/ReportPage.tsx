@@ -192,7 +192,7 @@ const ReportPage: React.FC = () => {
             </Card.Header>
             <Card.Body className="p-4 pt-2">
               <p className="text-muted small mb-4">
-                Our AI model analyzed your academic performance across {recommendations.subject_grades_points.length} subjects along with your interests and aptitudes.
+                Our machine learning model analyzed your academic performance across {recommendations.subject_grades_points.length} subjects along with your interests and aptitudes.
                 The current recommendation engine is operating with <strong>{(recommendations.model_accuracy * 100).toFixed(1)}% accuracy</strong>.
               </p>
               <Row>
@@ -200,12 +200,18 @@ const ReportPage: React.FC = () => {
                   <div className="mb-3">
                     <label className="small text-muted mb-1 d-block">Academic Performance</label>
                     <ProgressBar now={(recommendations.average_points / 12) * 100} variant="primary" style={{ height: '10px' }} />
+                    <div className="text-end small fw-bold text-primary mt-1">
+                      {((recommendations.average_points / 12) * 100).toFixed(1)}%
+                    </div>
                   </div>
                 </Col>
                 <Col md={6}>
                   <div className="mb-3">
                     <label className="small text-muted mb-1 d-block">Model Confidence</label>
                     <ProgressBar now={recommendations.model_accuracy * 100} variant="success" style={{ height: '10px' }} />
+                    <div className="text-end small fw-bold text-success mt-1">
+                      {(recommendations.model_accuracy * 100).toFixed(1)}%
+                    </div>
                   </div>
                 </Col>
               </Row>
@@ -339,7 +345,7 @@ const ReportPage: React.FC = () => {
                       <Badge bg="success" pill>Career Path</Badge>
                     </div>
                     <div className="d-flex align-items-center small">
-                      <span className="text-muted me-2">AI Confidence: High</span>
+                      <span className="text-muted me-2">Model Confidence: High</span>
                     </div>
                   </div>
                 </Accordion.Header>

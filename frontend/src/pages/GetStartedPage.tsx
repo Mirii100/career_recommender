@@ -79,9 +79,12 @@ const GetStartedPage: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <Button variant="success" size="lg" onClick={() => navigate('/form')} className="px-5">
-                    Go to Recommendation Form
-                  </Button>
+                  <div className="d-flex flex-column align-items-center gap-3">
+                    <p className="text-muted fw-bold">We're delighted you're taking this step! Let's start discovering your perfect career path together.</p>
+                    <Button variant="success" size="lg" onClick={() => navigate('/form')} className="px-5 rounded-pill shadow-sm">
+                      Start My Personalized Career Journey
+                    </Button>
+                  </div>
                 )}
               </div>
             </Card.Body>
