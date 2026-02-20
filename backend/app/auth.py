@@ -97,7 +97,14 @@ def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = get_password_hash(user.password)
 
 
-    db_user = models.User(username=user.username, email=user.email, hashed_password=hashed_password)
+    db_user = models.User(
+        username=user.username, 
+        email=user.email, 
+        hashed_password=hashed_password,
+        school_attended=user.school_attended,
+        id_birth_cert_number=user.id_birth_cert_number,
+        phone_number=user.phone_number
+    )
 
 
     db.add(db_user)
@@ -135,10 +142,18 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def update_user(db: Session, current_user: models.User, user_update: schemas.UserUpdate):
     if user_update.username is not None:
         current_user.username = user_update.username
+    if user_update.email is not None:
+        current_user.email = user_update.email
     if user_update.password is not None:
         current_user.hashed_password = get_password_hash(user_update.password)
     if user_update.profile_image_url is not None:
         current_user.profile_image_url = user_update.profile_image_url
+    if user_update.school_attended is not None:
+        current_user.school_attended = user_update.school_attended
+    if user_update.id_birth_cert_number is not None:
+        current_user.id_birth_cert_number = user_update.id_birth_cert_number
+    if user_update.phone_number is not None:
+        current_user.phone_number = user_update.phone_number
     db.add(current_user)
     db.commit()
     db.refresh(current_user)

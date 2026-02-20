@@ -20,7 +20,7 @@ const HomePage = () => {
               
               {!token ? (
                 <div className="d-flex gap-3 mb-4">
-                  <Link to="/register" className="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow text-decoration-none">
+                  <Link to="/get-started" className="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow text-decoration-none">
                     Get Started
                   </Link>
                   <Link to="/login" className="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill text-decoration-none">

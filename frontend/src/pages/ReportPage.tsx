@@ -99,7 +99,14 @@ const ReportPage: React.FC = () => {
 
 
 
-  const handleRatingSubmit = async (recommendationId: number, recommendationName: string) => {
+  const handleRatingSubmit = async (recommendationId: number, recommendationName: string, ratingOverride?: number) => {
+    const finalRating = ratingOverride !== undefined ? ratingOverride : ratings[recommendationId];
+    
+    if (!finalRating) {
+      alert('Please select a rating star first.');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:8000/ratings/', {
         method: 'POST',
@@ -109,8 +116,8 @@ const ReportPage: React.FC = () => {
         },
         body: JSON.stringify({
           recommendation_id: recommendationId,
-          rating: ratings[recommendationId],
-          comment: comments[recommendationId]
+          rating: finalRating,
+          comment: comments[recommendationId] || ''
         }),
       });
 
@@ -277,11 +284,17 @@ const ReportPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-top">
+                    <div className="mt-4 pt-4 border-top no-print">
                       <h6 className="fw-bold mb-3">Provide Feedback</h6>
                       <StarRating
                         rating={ratings[course.id!] || 0}
-                        setRating={(rating) => setRatings({ ...ratings, [course.id!]: rating })}
+                        setRating={(newRating) => {
+                          setRatings({ ...ratings, [course.id!]: newRating });
+                          // Auto-submit if comment is empty
+                          if (!comments[course.id!] || comments[course.id!].trim() === "") {
+                            handleRatingSubmit(course.id!, course.name, newRating);
+                          }
+                        }}
                       />
                       <Form.Group className="mt-3">
                         <Form.Control
@@ -338,19 +351,35 @@ const ReportPage: React.FC = () => {
                       <p className="mb-0 small">{career.reasoning}</p>
                     </div>
                     
-                    <div className="mt-4 pt-4 border-top">
+                    <div className="mt-4 pt-4 border-top no-print">
                       <h6 className="fw-bold mb-3">Rate this Career Recommendation</h6>
                       <StarRating
                         rating={ratings[career.id!] || 0}
-                        setRating={(rating) => setRatings({ ...ratings, [career.id!]: rating })}
+                        setRating={(newRating) => {
+                          setRatings({ ...ratings, [career.id!]: newRating });
+                          // Auto-submit if comment is empty
+                          if (!comments[career.id!] || comments[career.id!].trim() === "") {
+                            handleRatingSubmit(career.id!, career.name, newRating);
+                          }
+                        }}
                       />
+                      <Form.Group className="mt-3">
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          placeholder="Your thoughts on this career path..."
+                          className="bg-white border-0 shadow-sm"
+                          value={comments[career.id!] || ''}
+                          onChange={(e) => setComments({ ...comments, [career.id!]: e.target.value })}
+                        />
+                      </Form.Group>
                       <Button
                         variant="success"
                         size="sm"
                         className="mt-3 px-4 rounded-pill"
                         onClick={() => handleRatingSubmit(career.id!, career.name)}
                       >
-                        Confirm Match
+                        Submit Feedback
                       </Button>
                     </div>
                   </div>

@@ -162,6 +162,24 @@ const DashboardPage: React.FC = () => {
               <p className="text-muted small mb-4">{userDetails?.email}</p>
               
               <div className="bg-light rounded-3 p-3 mb-3 text-start">
+                {userDetails?.school_attended && (
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="small text-muted">School:</span>
+                    <span className="small fw-bold">{userDetails.school_attended}</span>
+                  </div>
+                )}
+                {userDetails?.id_birth_cert_number && (
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="small text-muted">ID/Cert No:</span>
+                    <span className="small fw-bold">{userDetails.id_birth_cert_number}</span>
+                  </div>
+                )}
+                {userDetails?.phone_number && (
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="small text-muted">Phone:</span>
+                    <span className="small fw-bold">{userDetails.phone_number}</span>
+                  </div>
+                )}
                 <div className="d-flex justify-content-between mb-2">
                   <span className="small text-muted">Assessments:</span>
                   <span className="small fw-bold">{recommendationHistory.length}</span>

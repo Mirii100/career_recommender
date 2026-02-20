@@ -105,7 +105,7 @@ rf_course_pipeline = Pipeline(steps=[
 
 xgb_course_pipeline = Pipeline(steps=[
     ('preprocessor', course_preprocessor),
-    ('classifier', xgb.XGBClassifier(objective='multi:softmax', num_class=len(y_course.unique()), use_label_encoder=False, eval_metric='mlogloss', n_estimators=100, random_state=42))
+    ('classifier', xgb.XGBClassifier(objective='multi:softmax', num_class=len(y_course.unique()), eval_metric='mlogloss', n_estimators=100, random_state=42))
 ])
 
 svm_course_pipeline = Pipeline(steps=[
@@ -221,6 +221,37 @@ try:
     db.add_all([rf_course_metrics, xgb_course_metrics, svm_course_metrics, career_metrics])
     db.commit()
     print("Model metrics successfully saved to the database.")
+
+    # Save metrics to JSON file for Recommender class
+    metrics_json = {
+        "random_forest_course": {
+            "accuracy": rf_course_accuracy,
+            "precision": rf_course_precision,
+            "recall": rf_course_recall,
+            "f1_score": rf_course_f1
+        },
+        "xgboost_course": {
+            "accuracy": xgb_course_accuracy,
+            "precision": xgb_course_precision,
+            "recall": xgb_course_recall,
+            "f1_score": xgb_course_f1
+        },
+        "svm_course": {
+            "accuracy": svm_course_accuracy,
+            "precision": svm_course_precision,
+            "recall": svm_course_recall,
+            "f1_score": svm_course_f1
+        },
+        "career_recommendation": {
+            "accuracy": career_accuracy,
+            "precision": career_precision,
+            "recall": career_recall,
+            "f1_score": career_f1
+        }
+    }
+    with open('./app/model_metrics.json', 'w') as f:
+        json.dump(metrics_json, f, indent=4)
+    print("Model metrics successfully saved to ./app/model_metrics.json")
 
 except Exception as e:
     print(f"Error saving metrics to database: {e}")

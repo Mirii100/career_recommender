@@ -30,6 +30,9 @@ class Recommendations(BaseModel):
 class UserBase(BaseModel):
     username: str
     email: str
+    school_attended: Optional[str] = None
+    id_birth_cert_number: Optional[str] = None
+    phone_number: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -46,7 +49,7 @@ class User(UserBase):
     profile_image_url: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -64,7 +67,7 @@ class Rating(RatingCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RecommendationInDB(BaseModel):
     id: int
@@ -74,12 +77,16 @@ class RecommendationInDB(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
+    email: Optional[str] = None
     password: Optional[str] = None
     profile_image_url: Optional[str] = None
+    school_attended: Optional[str] = None
+    id_birth_cert_number: Optional[str] = None
+    phone_number: Optional[str] = None
 
 class ForgotPasswordRequest(BaseModel):
     email: str

@@ -9,7 +9,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/login', { state: { loggedOut: true } });
   };
 
   return (
@@ -19,6 +19,11 @@ const Sidebar = () => {
         <Nav.Item>
           <Nav.Link as={NavLink} to="/" end className="d-flex align-items-center rounded-3 py-2 px-3">
             <i className="bi bi-house-door me-3"></i>About / Home
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link as={NavLink} to="/get-started" className="d-flex align-items-center rounded-3 py-2 px-3">
+            <i className="bi bi-info-circle me-3"></i>Get Started
           </Nav.Link>
         </Nav.Item>
         {token && (

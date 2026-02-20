@@ -1,1 +1,26 @@
-{"random_forest_course": {"accuracy": 0.976, "precision": 0.9763145020384392, "recall": 0.976, "f1_score": 0.9760881504924491}, "xgboost_course": {"accuracy": 0.986, "precision": 0.986059405940594, "recall": 0.986, "f1_score": 0.9860198504962623}, "career_recommendation": {"accuracy": 0.9805555555555555, "precision": 0.9814925429508763, "recall": 0.9805555555555555, "f1_score": 0.9804577365313444}}
+{
+    "random_forest_course": {
+        "accuracy": 0.976,
+        "precision": 0.9763145020384392,
+        "recall": 0.976,
+        "f1_score": 0.9760881504924491
+    },
+    "xgboost_course": {
+        "accuracy": 0.986,
+        "precision": 0.986059405940594,
+        "recall": 0.986,
+        "f1_score": 0.9860198504962623
+    },
+    "svm_course": {
+        "accuracy": 0.628,
+        "precision": 0.6283135904894261,
+        "recall": 0.628,
+        "f1_score": 0.6273709807797662
+    },
+    "career_recommendation": {
+        "accuracy": 0.9805555555555555,
+        "precision": 0.9814925429508763,
+        "recall": 0.9805555555555555,
+        "f1_score": 0.9804577365313444
+    }
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import HomePage from './pages/HomePage';
+import GetStartedPage from './pages/GetStartedPage';
 import UserInputPage from './pages/UserInputPage';
 import ReportPage from './pages/ReportPage';
 import DataInsightsPage from './pages/DataInsightsPage';
@@ -32,6 +33,7 @@ function App() {
             <main className="flex-grow-1 p-4" style={{ overflowY: 'auto', height: '100vh' }}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/get-started" element={<GetStartedPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} /> {/* New route */}

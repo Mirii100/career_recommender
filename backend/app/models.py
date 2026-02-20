@@ -37,6 +37,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String)
     profile_image_url = Column(String, nullable=True)
+    school_attended = Column(String, nullable=True)
+    id_birth_cert_number = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
 
     password_reset_tokens = relationship("PasswordResetToken", back_populates="user")
 

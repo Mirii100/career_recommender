@@ -12,10 +12,14 @@ interface UserProfileFormProps {
 const UserProfileForm: React.FC<UserProfileFormProps> = ({ show, handleClose, currentUser, onUserUpdate }) => {
   const { token } = useAuth();
   const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [profileImageUrl, setProfileImageUrl] = useState<string>('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // New state for the actual file object
+  const [schoolAttended, setSchoolAttended] = useState<string>('');
+  const [idBirthCertNumber, setIdBirthCertNumber] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -23,7 +27,11 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ show, handleClose, cu
   useEffect(() => {
     if (currentUser) {
       setUsername(currentUser.username);
+      setEmail(currentUser.email || '');
       setProfileImageUrl(currentUser.profile_image_url || '');
+      setSchoolAttended(currentUser.school_attended || '');
+      setIdBirthCertNumber(currentUser.id_birth_cert_number || '');
+      setPhoneNumber(currentUser.phone_number || '');
       if (currentUser.profile_image_url) {
         setImagePreviewUrl(currentUser.profile_image_url);
       }
@@ -94,9 +102,20 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ show, handleClose, cu
       finalProfileImageUrl = currentUser.profile_image_url || '';
     }
 
-    const updateData: { username?: string; password?: string; profile_image_url?: string } = {};
+    const updateData: { 
+      username?: string; 
+      email?: string;
+      password?: string; 
+      profile_image_url?: string;
+      school_attended?: string;
+      id_birth_cert_number?: string;
+      phone_number?: string;
+    } = {};
     if (username !== currentUser.username) {
       updateData.username = username;
+    }
+    if (email !== currentUser.email) {
+      updateData.email = email;
     }
     if (password) {
       updateData.password = password;
@@ -104,6 +123,15 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ show, handleClose, cu
     // Only send profile_image_url if it has changed
     if (finalProfileImageUrl !== (currentUser.profile_image_url || '')) {
       updateData.profile_image_url = finalProfileImageUrl;
+    }
+    if (schoolAttended !== (currentUser.school_attended || '')) {
+      updateData.school_attended = schoolAttended;
+    }
+    if (idBirthCertNumber !== (currentUser.id_birth_cert_number || '')) {
+      updateData.id_birth_cert_number = idBirthCertNumber;
+    }
+    if (phoneNumber !== (currentUser.phone_number || '')) {
+      updateData.phone_number = phoneNumber;
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -149,6 +177,46 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ show, handleClose, cu
               placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formSchoolAttended">
+            <Form.Label>School Attended</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter your current or former school"
+              value={schoolAttended}
+              onChange={(e) => setSchoolAttended(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formIdBirthCert">
+            <Form.Label>ID or Birth Certificate Number</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter your identification number"
+              value={idBirthCertNumber}
+              onChange={(e) => setIdBirthCertNumber(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formPhoneNumber">
+            <Form.Label>Phone Number</Form.Label>
+            <Form.Control
+              type="tel"
+              placeholder="Enter your phone number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
             />
           </Form.Group>
 
