@@ -13,12 +13,12 @@ const GetStartedPage: React.FC = () => {
         <Col md={10} lg={8}>
           <Card className="shadow-sm border-0 rounded-lg">
             <Card.Body className="p-5">
-              <h1 className="text-primary mb-4">Getting Started with Career Guidance</h1>
+              <h1 className="text-primary mb-4">Getting Started with Course Guidance</h1>
               
               <section className="mb-5">
                 <h3>What is this site?</h3>
                 <p className="lead">
-                  This application is an AI-powered Career Guidance System designed to help students make informed decisions about their future. 
+                  This application is an AI-powered Course Guidance Recommender System designed to help students make informed decisions about their future. 
                   By leveraging advanced Machine Learning algorithms, we analyze your academic performance and personal strengths to provide personalized recommendations.
                 </p>
                 <div className="alert alert-info">
@@ -82,7 +82,7 @@ const GetStartedPage: React.FC = () => {
                   <div className="d-flex flex-column align-items-center gap-3">
                     <p className="text-muted fw-bold">We're delighted you're taking this step! Let's start discovering your perfect career path together.</p>
                     <Button variant="success" size="lg" onClick={() => navigate('/form')} className="px-5 rounded-pill shadow-sm">
-                      Start My Personalized Career Journey
+                      Start My Personalized Course Guidance Journey
                     </Button>
                   </div>
                 )}

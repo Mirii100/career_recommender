@@ -157,7 +157,7 @@ const StudentForm = () => {
     <div className="container-fluid no-print">
       <Card className="shadow-lg border-0 rounded-4 overflow-hidden mb-5">
         <div className="bg-primary p-4 text-white text-center">
-          <h2 className="fw-bold mb-0">Career Path Assessment</h2>
+          <h2 className="fw-bold mb-0">Course Guidance Assessment</h2>
           <p className="opacity-75 mb-0">Step {step} of 3: {step === 1 ? 'Academic Performance' : step === 2 ? 'Aptitudes & Skills' : 'Personal Assessment'}</p>
         </div>
         <ProgressBar now={(step / 3) * 100} className="rounded-0" style={{ height: '6px' }} />
@@ -325,7 +325,7 @@ const StudentForm = () => {
                     <div className="mt-5 p-4 bg-primary bg-opacity-10 rounded-4">
                       <p className="small mb-0 text-primary">
                         <i className="bi bi-shield-check me-2"></i>
-                        By clicking "Generate Recommendations", our AI will process your data to find the best career matches.
+                        By clicking "Generate Recommendations", our AI will process your data to find the best course and career matches.
                       </p>
                     </div>
                   </Card.Body>

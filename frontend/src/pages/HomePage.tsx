@@ -14,7 +14,7 @@ const HomePage = () => {
             <Col lg={7}>
               <h1 className="display-4 fw-bold mb-4 text-primary">Your Future, Guided by Technology</h1>
               <Card.Text className="lead mb-4">
-                This system is designed to provide personalized course and career guidance for high school graduates.
+                This Course Guidance Recommender System is designed to provide personalized recommendations for high school graduates.
                 It bridges the gap between educational outcomes and long-term career success by integrating academic results, student interests, and local labor market insights.
               </Card.Text>
               
